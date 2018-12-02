@@ -10,6 +10,7 @@ pitstop
 secrets retrieval, and other configuration related administrivia logic
 *out* of your application, improving maintainability, reducing
 complexity, and encouraging better configuration management practices.
+
 .. -end-short-
 
 Overview
