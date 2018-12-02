@@ -1,0 +1,120 @@
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.black]
+line-length = 79
+py36 = true
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.(git|hg|mypy_cache|tox|venv)
+  | _?build
+  | dist
+)/
+'''
+skip-string-normalization = true
+
+[[tool.pitstop.backends]]
+driver = "fs"
+priority = 1
+encoding = "toml"
+
+  [tool.pitstop.backends.options]
+  path = "pyproject.toml"
+
+# [[tool.pitstop.backends]]
+# driver = "vault"
+# priority = 2
+#
+#   [tool.pitstop.backends.options]
+#   token = "secret"
+
+[tool.pitstop.strategy]
+version = 1
+
+  # [tool.pitstop.strategy.backend_priority_overrides.foo]
+  # foo = [ "vault" ]
+
+# Using tables rather than dotted keys (which are supported since TOML 0.5) to
+# remain compatible with TOML 0.4 and the pytoml library, used by pip, which
+# parses PEP 518 ``pyproject.toml`` files.
+[tool.pitstop.schema.tool]
+type = "dict"
+[tool.pitstop.schema.tool.schema.pitstop]
+  type = "dict"
+[tool.pitstop.schema.tool.schema.pitstop.schema.backends]
+  type = "list"
+[tool.pitstop.schema.tool.schema.pitstop.schema.backends.schema]
+  type = "dict"
+[tool.pitstop.schema.tool.schema.pitstop.schema.backends.schema.schema.driver]
+  isentrypoint = "pitstop.backends"
+[tool.pitstop.schema.tool.schema.pitstop.schema.backends.schema.schema.priority]
+  type = "integer"
+[tool.pitstop.schema.tool.schema.pitstop.schema.backends.schema.schema.name]
+  type = "string"
+[tool.pitstop.schema.tool.schema.pitstop.schema.backends.schema.schema.encoding]
+  isentrypoint = "pitstop.encodings"
+[tool.pitstop.schema.tool.schema.pitstop.schema.backends.schema.schema.options]
+  type = "dict"
+  allow_unknown = true
+[tool.pitstop.schema.tool.schema.pitstop.schema.strategy]
+  type = "dict"
+[tool.pitstop.schema.tool.schema.pitstop.schema.strategy.schema.version]
+  type = "integer"
+  allowed = [ 1 ]
+[tool.pitstop.schema.tool.schema.pitstop.schema.strategy.schema.backend_priority_overrides]
+  type = "dict"
+  allow_unknown = { "type" = "list" }
+
+[tool.poetry]
+name = "pitstop"
+version = "0.1.0"
+description = ""
+authors = ["David Gidwani <david.gidwani@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.4"
+click = "^6.7"
+stevedore = "^1.29"
+wrapt = "^1.10"
+glom = "^18.3"
+sortedcontainers = "^2.0"
+cleo = "^0.6.8"
+typing_inspect = "^0.3.1"
+cerberus = "^1.2"
+toml = "^0.10.0"
+hvac = {version = "^0.7.0",optional = true}
+dataclasses = {version = "^0.6.0",python = "<3.7"}
+structlog = "^18.2"
+colorama = "^0.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+mypy = "^0.641.0"
+pytest-cov = "^2.6"
+tox = "^3.5"
+tox-pyenv = "^1.1"
+black = {version = "^18.6-beta.4",allows-prereleases = true,python = "3.6"}
+flake8 = "^3.6"
+sphinx = "^1.8"
+
+[tool.poetry.extras]
+vault = ["hvac"]
+
+[tool.poetry.plugins]
+
+[tool.poetry.plugins."pitstop.backends"]
+"fs" = "pitstop.backends.fs:FilesystemBackend"
+"env" = "pitstop.backends.env:EnvironmentBackend"
+"vault" = "pitstop.backends.vault:VaultBackend"
+
+[tool.poetry.plugins."pitstop.encodings"]
+"json" = "pitstop.encodings.json:JSONEncoding"
+"toml" = "pitstop.encodings.toml:TOMLEncoding"
+
+[tool.poetry.plugins."pitstop.strategies"]
+"v1" = "pitstop.strategies.v1:VersionOneStrategy"
+
+[tool.poetry.scripts]
+pitstop = 'pitstop.cli:main'
