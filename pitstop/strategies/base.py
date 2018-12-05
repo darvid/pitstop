@@ -41,6 +41,10 @@ class BaseStrategy(abc.ABC):
         default_factory=dict
     )
 
+    _defaults_cache: pitstop.types.T_StrAnyDict = dataclasses.field(
+        default_factory=dict, init=False, repr=False
+    )
+
     def connect_all(self, decode: bool = True) -> None:
         """Initialize all backends.
 
@@ -79,3 +83,32 @@ class BaseStrategy(abc.ABC):
     @abc.abstractmethod
     def resolve(self) -> pitstop.types.T_StrAnyMapping:
         """Resolve a complete configuration object based on schema."""
+
+    def _get_schema_default(
+        self, path: str, use_cache: bool = True
+    ) -> typing.Any:
+        """Get the default value for a key from current :attr:`schema`.
+
+        Args:
+            path (str): The key path.
+            use_cache (bool, optional): If ``True``, default values from
+                the schema are memoized to instance state. Defaults to
+                ``True``.
+
+        Returns:
+            The default value or ``None`` is not set in the schema.
+
+        Raises:
+            KeyError: If the key does not exist in the schema.
+
+        """
+        if path in self._defaults_cache:
+            return self._defaults_cache[path]
+        for leaf, schema in pitstop.utils.schema_leaves(self.schema):
+            if leaf != path:
+                continue
+            default = schema.get('default')
+            if default is not None:
+                self._defaults_cache[path] = default
+            return default
+        raise KeyError(path)

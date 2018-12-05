@@ -46,3 +46,9 @@ practice, but gives you a feel for the API:
    # You can also get keys individually.
    print(strategy.get('frobnicator_name'))
    # -> 'foobar'
+
+   # You can choose to override defaults, or use the schema default
+   print(strategy.get('frobnicator_level', default=24))
+   # -> 24
+   print(strategy.get('frobnicator_level'))
+   # -> 42

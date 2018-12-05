@@ -124,4 +124,6 @@ class DictBackend(BaseObjectBackend):
                 not provided.
 
         """
-        return self.obj.get(key, default)
+        if default is not None:
+            return self.obj.get(key, default)
+        raise KeyError(key)

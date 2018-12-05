@@ -92,7 +92,7 @@ class VersionOneStrategy(
             except KeyError:
                 continue
         if default is None:
-            raise KeyError(path)
+            return self._get_schema_default(path)
         return default
 
     def resolve(
@@ -120,7 +120,7 @@ class VersionOneStrategy(
 
         """
         document: pitstop.types.T_StrAnyMapping = {}
-        for leaf, schema in pitstop.utils.leaves(self.schema):
+        for leaf, schema in pitstop.utils.schema_leaves(self.schema):
             try:
                 pitstop.utils.unglom(document, leaf, self.get(leaf))
             except KeyError:

@@ -43,5 +43,9 @@ instead:
 .. toctree::
    :maxdepth: 2
 
+   rationale
+   concepts
+   metaconfiguration
    Library Usage <library>
+   cli
    API Reference <pitstop>

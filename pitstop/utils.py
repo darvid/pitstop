@@ -9,16 +9,33 @@ import typing_inspect
 from pitstop.types import T_StrAnyMapping
 
 
-__all__ = ('leaves', 'OptionsBag', 'OptionsBagMixin', 'T_OptionsBag', 'unglom')
+__all__ = (
+    'schema_leaves',
+    'OptionsBag',
+    'OptionsBagMixin',
+    'T_OptionsBag',
+    'unglom',
+)
 
 
 T_OptionsBag = typing.TypeVar('T_OptionsBag')
 
 
-def leaves(
+def schema_leaves(
     d: T_StrAnyMapping, parent: typing.Optional[str] = None
 ) -> typing.Generator[typing.Tuple[str, typing.Any], None, None]:
-    """Find the leaves of a given dictionary.
+    """Find the leaves of a given :mod:`cerberus` schema dictionary.
+
+        >>> schema = {
+        ...     'foo': {
+        ...         'type': 'dict',
+        ...         'schema': {
+        ...             'bar': {'type': 'string'},
+        ...         },
+        ...     },
+        ... }
+        >>> list(leaves(schema))
+        [('foo.bar', {'type': 'string'})]
 
     Args:
         d (:obj:`dict`): A dictionary tree.
@@ -29,10 +46,10 @@ def leaves(
     """
     for key, value in d.items():
         if parent is not None:
-            key = ".".join((parent, key))
+            key = '.'.join((parent, key))
         try:
-            if value["type"] == "dict":
-                yield from leaves(value["schema"], parent=key)
+            if value['type'] == 'dict':
+                yield from schema_leaves(value['schema'], parent=key)
             else:
                 yield (key, value)
         except (KeyError, TypeError):
